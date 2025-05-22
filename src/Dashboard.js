@@ -31,25 +31,50 @@ export default function Dashboard() {
     const file = e.target.files[0];
     const data = await file.arrayBuffer();
     const workbook = XLSX.read(data);
-    const sheet = workbook.Sheets[workbook.SheetNames[3]];
-    const json = XLSX.utils.sheet_to_json(sheet);
 
-    const cleaned = json
+    let targetSheet;
+    for (const name of workbook.SheetNames) {
+      const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1 });
+      const headers = sheet[0].map(h => h.toString().trim().toLowerCase());
+      if (headers.includes("buildingname") && headers.includes("taskseq")) {
+        targetSheet = XLSX.utils.sheet_to_json(workbook.Sheets[name]);
+        break;
+      }
+    }
+
+    if (!targetSheet) {
+      alert("Could not find a sheet with the expected columns.");
+      return;
+    }
+
+    console.log("Parsed rows:", targetSheet);
+
+    const cleaned = targetSheet
       .filter((row) => row["buildingName"] && row["taskSeq"])
       .map((row) => ({
         task_seq: String(row["taskSeq"]),
         school: row["buildingName"],
-        description: row["longDescription"] || row["shortDescription"],
+        description: row["longDescription"] || row["shortDescription"] || "No description",
         due_date: new Date(row["taskDueDate"]).toISOString(),
         completed: false,
         created_at: new Date().toISOString(),
       }));
 
+    if (cleaned.length === 0) {
+      alert("No valid tasks found in this file.");
+      return;
+    }
+
     const { error } = await supabase.from("tasks").upsert(cleaned, {
       onConflict: ["task_seq"],
     });
 
-    if (!error) fetchTasks();
+    if (error) {
+      alert("Error uploading tasks: " + error.message);
+    } else {
+      alert("Tasks uploaded successfully.");
+      fetchTasks();
+    }
   };
 
   const filtered = tasks.filter((task) =>
