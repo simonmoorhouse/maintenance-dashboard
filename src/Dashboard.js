@@ -22,7 +22,7 @@ export default function Dashboard() {
     const { data, error } = await supabase
       .from("tasks")
       .select("*")
-      .eq("school", "Colne Valley High School")
+      .eq("school", "Colne Valley HS")
       .order("due_date", { ascending: true });
     if (!error) setTasks(data);
   };
@@ -48,7 +48,7 @@ export default function Dashboard() {
     }
 
     const filtered = targetSheet.filter(
-      (row) => row["buildingName"]?.trim() === "Colne Valley High School"
+      (row) => row["buildingName"]?.trim() === "Colne Valley HS"
     );
 
     if (filtered.length === 0) {
