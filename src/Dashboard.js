@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 import { format } from "date-fns";
 
 export default function Dashboard() {
@@ -10,7 +10,6 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
 
-  // Simulated task data (replace with Supabase fetch in real app)
   useEffect(() => {
     const sample = [
       {
@@ -29,14 +28,15 @@ export default function Dashboard() {
     setTasks(sample);
   }, []);
 
-  // Filter tasks
   useEffect(() => {
-    const now = new Date();
     setFiltered(
-      tasks.filter((task) =>
-        task.description.toLowerCase().includes(search.toLowerCase()) ||
-        task.school.toLowerCase().includes(search.toLowerCase())
-      ).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+      tasks
+        .filter(
+          (task) =>
+            task.description.toLowerCase().includes(search.toLowerCase()) ||
+            task.school.toLowerCase().includes(search.toLowerCase())
+        )
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
     );
   }, [search, tasks]);
 
